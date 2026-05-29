@@ -1,0 +1,21 @@
+# wrangler.toml
+# Cloudflare Pages + D1 configuration for TimeIreland
+
+name = "timeireland"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "dist"
+
+# ── D1 database binding ────────────────────────────────────────────────────────
+# Create the database first:
+#   npx wrangler d1 create timeireland
+# Then paste the database_id returned below.
+
+[[d1_databases]]
+binding      = "DB"
+database_name = "timeireland"
+database_id  = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+# ── Local development ──────────────────────────────────────────────────────────
+[dev]
+port         = 8788
+local_protocol = "http"
