@@ -16,6 +16,7 @@ import { useAppStore }  from '@/store'
 import { SyncBadge }    from '@/components/SyncBadge'
 import { useToast }     from '@/components/Toast'
 import { useSync }      from '@/hooks/useSync'
+import { BackupSection } from '@/components/BackupSection'
 import type {
   IrishPayrollSettings, TimeFormat,
   HourlyRate, PublicHoliday, DayOfWeek,
@@ -584,7 +585,7 @@ function PublicHolidaysSection() {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export function SettingsPage() {
+export function SettingsPage({ onSwitchProfile }: { onSwitchProfile?: () => void }) {
   const savedSettings  = useAppStore((s) => s.payrollSettings)
   const updateSettings = useAppStore((s) => s.updatePayrollSettings)
   const timeFormat     = useAppStore((s) => s.timeFormat)
@@ -720,6 +721,9 @@ export function SettingsPage() {
       {/* ── Holidays ── */}
       <SectionTitle>Holidays</SectionTitle>
       <PublicHolidaysSection />
+
+      {/* ── Backup & profiles ── */}
+      <BackupSection onSwitchProfile={() => onSwitchProfile?.()} />
 
       {/* ── App info ── */}
       <SectionTitle>App Info</SectionTitle>
