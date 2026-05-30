@@ -15,7 +15,7 @@ import {
 import { useAppStore }  from '@/store'
 import { SyncBadge }    from '@/components/SyncBadge'
 import { useToast }     from '@/components/Toast'
-import { useSync }      from '@/hooks/useSync'
+import { useSync }        from '@/hooks/useSync'
 import { BackupSection } from '@/components/BackupSection'
 import type {
   IrishPayrollSettings, TimeFormat,
@@ -167,7 +167,7 @@ function Accordion({ title, badge, children, defaultOpen = false }: {
 }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
-    <div className="bg-surface-card border border-surface-border rounded-card overflow-hidden">
+    <div className="bg-surface-card border border-surface-border rounded-card">
       <button onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between px-4 py-4 gap-3 hover:bg-surface-raised/50 transition-colors">
         <div className="flex items-center gap-2">

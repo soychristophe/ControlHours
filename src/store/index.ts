@@ -4,6 +4,11 @@
  */
 
 import { create } from 'zustand'
+import {
+  idbUpsertSession, idbDeleteSession,
+  idbUpsertProject,
+  idbSaveSettings,
+} from '@/db/offline'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import type {
   TabId, WorkSession, Project,
@@ -178,10 +183,12 @@ export const useAppStore = create<AppStore>()(
       stopSession: () => {
         const { currentSession, sessions } = get()
         if (!currentSession) return
+        const completed = { ...currentSession, endTime: new Date() }
         set({
           currentSession: null,
-          sessions: sortByStart([{ ...currentSession, endTime: new Date() }, ...sessions]),
+          sessions: sortByStart([completed, ...sessions]),
         })
+        idbUpsertSession(completed as unknown as Record<string, unknown>).catch(console.warn)
       },
 
       updateSessionNote: (id, note) => set((state) => {
@@ -193,30 +200,31 @@ export const useAppStore = create<AppStore>()(
       updateSession: (id, updates) => set((state) => {
         if (state.currentSession?.id === id)
           return { currentSession: { ...state.currentSession, ...updates } }
-        return {
-          sessions: sortByStart(
-            state.sessions.map((s) => s.id === id ? { ...s, ...updates } : s)
-          ),
-        }
+        const updated = state.sessions.map((s) => s.id === id ? { ...s, ...updates } : s)
+        const target = updated.find((s) => s.id === id)
+        if (target) idbUpsertSession(target as unknown as Record<string, unknown>).catch(console.warn)
+        return { sessions: sortByStart(updated) }
       }),
 
-      addManualSession: (session) => set((state) => ({
-        sessions: sortByStart([{ ...session, id: genId() }, ...state.sessions]),
-      })),
+      addManualSession: (session) => set((state) => {
+        const newSession = { ...session, id: genId() }
+        idbUpsertSession(newSession as unknown as Record<string, unknown>).catch(console.warn)
+        return { sessions: sortByStart([newSession, ...state.sessions]) }
+      }),
 
-      deleteSession: (id) => set((state) => ({
-        sessions: state.sessions.filter((s) => s.id !== id),
-      })),
+      deleteSession: (id) => {
+        idbDeleteSession(id).catch(console.warn)
+        set((state) => ({ sessions: state.sessions.filter((s) => s.id !== id) }))
+      },
 
       // ── Projects ────────────────────────────────────────────────────────────
       projects: [],
 
-      addProject: (project) => set((state) => ({
-        projects: [
-          ...state.projects,
-          { ...project, id: genId(), createdAt: new Date(), isArchived: false },
-        ],
-      })),
+      addProject: (project) => set((state) => {
+        const newProject = { ...project, id: genId(), createdAt: new Date(), isArchived: false }
+        idbUpsertProject(newProject as unknown as Record<string, unknown>).catch(console.warn)
+        return { projects: [...state.projects, newProject] }
+      }),
 
       archiveProject: (id) => set((state) => ({
         projects: state.projects.map((p) => p.id === id ? { ...p, isArchived: true } : p),
@@ -224,9 +232,11 @@ export const useAppStore = create<AppStore>()(
 
       // ── Payroll ─────────────────────────────────────────────────────────────
       payrollSettings:       DEFAULT_PAYROLL,
-      updatePayrollSettings: (settings) => set((state) => ({
-        payrollSettings: { ...state.payrollSettings, ...settings },
-      })),
+      updatePayrollSettings: (settings) => set((state) => {
+        const merged = { ...state.payrollSettings, ...settings }
+        idbSaveSettings(merged as unknown as Record<string, unknown>).catch(console.warn)
+        return { payrollSettings: merged }
+      }),
 
       // ── Hourly rates ─────────────────────────────────────────────────────────
       hourlyRates: DEFAULT_HOURLY_RATES,

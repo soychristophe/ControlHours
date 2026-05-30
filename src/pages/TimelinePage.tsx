@@ -69,6 +69,50 @@ const INPUT: React.CSSProperties = {
   colorScheme: 'dark',
 }
 
+// ─── Split datetime helpers ───────────────────────────────────────────────────
+
+/** Split a datetime-local string "YYYY-MM-DDTHH:mm" into date and time parts */
+function splitDT(dt: string): { date: string; time: string } {
+  const [date = '', time = ''] = dt.split('T')
+  return { date, time }
+}
+
+/** Join date "YYYY-MM-DD" and time "HH:mm" back into datetime-local string */
+function joinDT(date: string, time: string): string {
+  return date && time ? `${date}T${time}` : ''
+}
+
+/**
+ * Two-field date+time input that avoids the AM/PM issue on iOS Safari.
+ * `<input type="time">` always renders in 24h on iOS when the value is set
+ * programmatically, regardless of locale — unlike datetime-local.
+ */
+function DateTimeInput({
+  value,
+  onChange,
+}: {
+  value: string
+  onChange: (v: string) => void
+}) {
+  const { date, time } = splitDT(value)
+  return (
+    <div style={{ display: 'flex', gap: 8 }}>
+      <input
+        type="date"
+        value={date}
+        onChange={(e) => onChange(joinDT(e.target.value, time))}
+        style={{ ...INPUT, flex: '1 1 55%' }}
+      />
+      <input
+        type="time"
+        value={time}
+        onChange={(e) => onChange(joinDT(date, e.target.value))}
+        style={{ ...INPUT, flex: '1 1 45%' }}
+      />
+    </div>
+  )
+}
+
 // ─── Current time line ────────────────────────────────────────────────────────
 
 function CurrentTimeLine({ selectedKey }: { selectedKey: string }) {
@@ -386,11 +430,11 @@ function AddSessionDrawer({ defaultDate, onClose }: { defaultDate: Date; onClose
     <DrawerShell title="Add session" onClose={onClose}>
       <div>
         <FieldLabel>Start — date &amp; time</FieldLabel>
-        <input type="datetime-local" value={startDT} onChange={(e) => { setStartDT(e.target.value); setError('') }} style={INPUT} />
+        <DateTimeInput value={startDT} onChange={(v) => { setStartDT(v); setError('') }} />
       </div>
       <div>
         <FieldLabel>End — date &amp; time</FieldLabel>
-        <input type="datetime-local" value={endDT} onChange={(e) => { setEndDT(e.target.value); setError('') }} style={INPUT} />
+        <DateTimeInput value={endDT} onChange={(v) => { setEndDT(v); setError('') }} />
       </div>
       <DurationStrip start={startDT} end={endDT} />
       <div>
@@ -437,11 +481,11 @@ function EditSessionDrawer({ session, onClose }: { session: WorkSession; onClose
     <DrawerShell title="Edit session" onClose={onClose}>
       <div>
         <FieldLabel>Start — date &amp; time</FieldLabel>
-        <input type="datetime-local" value={startDT} onChange={(e) => { setStartDT(e.target.value); setError('') }} style={INPUT} />
+        <DateTimeInput value={startDT} onChange={(v) => { setStartDT(v); setError('') }} />
       </div>
       <div>
         <FieldLabel>End — date &amp; time</FieldLabel>
-        <input type="datetime-local" value={endDT} onChange={(e) => { setEndDT(e.target.value); setError('') }} style={INPUT} />
+        <DateTimeInput value={endDT} onChange={(v) => { setEndDT(v); setError('') }} />
       </div>
       {startDT && endDT && <DurationStrip start={startDT} end={endDT} />}
       <div>
