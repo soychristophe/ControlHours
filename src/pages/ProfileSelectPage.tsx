@@ -19,7 +19,6 @@ import {
   snapshotProfile, updateProfile,
   type Profile,
 } from '@/utils/backup'
-import { useAppStore } from '@/store'
 
 // ─── Emoji avatar picker ──────────────────────────────────────────────────────
 
@@ -55,7 +54,6 @@ function ProfileCard({
   onExport: (p: Profile) => void
 }) {
   const fileRef = useRef<HTMLInputElement>(null)
-  const [menuOpen, setMenuOpen] = useState(false)
 
   return (
     <div className="relative group animate-slide-up">
@@ -330,7 +328,6 @@ export function ProfileSelectPage({ onLogin }: { onLogin: (profileId: string) =>
   const [showCreate,   setShowCreate]   = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Profile | null>(null)
   const [toast,        setToast]        = useState<string | null>(null)
-  const importRef = useRef<HTMLInputElement>(null)
 
   function showToast(msg: string) {
     setToast(msg)
