@@ -13,7 +13,7 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding      = "DB"
 database_name = "timeireland"
-database_id  = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id  = "24c8b883-0cd9-402b-856f-98bccc4c00a2"
 
 # ── Local development ──────────────────────────────────────────────────────────
 [dev]
